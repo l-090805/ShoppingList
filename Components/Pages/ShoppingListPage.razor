@@ -1,0 +1,82 @@
+﻿@page "/"
+@page "/shopping"
+@using Microsoft.EntityFrameworkCore
+@using ShoppingList.Data
+@using ShoppingList.Model
+@inject AppDbContext Db
+
+
+<title>Shopping List</title>
+<h2>Shopping List</h2>
+
+<div>
+	<input @bind="newName" placeholder="Product Name"/>
+	<input @bind="newQuantity" type="number" min="1"/>
+	<button @onclick="AddItem"> Add Item</button>
+</div>
+
+<hr class="horizontalDivider">
+
+@if (items != null && items.Any())
+{
+	<ul class="itemList">
+		@foreach (var item in items)
+		{
+			<li class="individualItem">
+				<input class="checkbox" type="checkbox" checked="@item.isBought" onchange="() => ToggleBought(item)"/>
+				<span style="@(item.isBought ? "text-decoration:line-through" : "")">
+					@item.name, @item.quantity
+				</span>
+				<button class="deleteItemButton" @onclick="() => DeleteItem(item)">Delete Item</button>
+			</li>
+		}
+	</ul>
+}
+else
+{
+	<p class="emptyListParag">List is empty</p>
+}
+
+@code {
+	private List<ShoppingItem> items = new();
+	private string newName = string.Empty;
+	private int newQuantity = 1;
+
+	protected override async Task OnInitializedAsync()
+	{
+		items = await Db.ShoppingItems.ToListAsync();
+	}
+
+	private async Task AddItem()
+	{
+		if (string.IsNullOrWhiteSpace(newName)) return;
+
+		var item = new ShoppingItem
+			{
+				name = newName,
+				quantity = newQuantity,
+				isBought = false
+			};
+
+		Db.ShoppingItems.Add(item);
+		await Db.SaveChangesAsync();
+
+		newName = string.Empty;
+		newQuantity = 1;
+		items = await Db.ShoppingItems.ToListAsync();
+	}
+
+	private async Task ToggleBought(ShoppingItem item)
+	{
+		item.isBought = !item.isBought;
+		await Db.SaveChangesAsync();
+		items = await Db.ShoppingItems.ToListAsync();
+	}
+
+	private async Task DeleteItem(ShoppingItem item)
+	{
+		Db.ShoppingItems.Remove(item);
+		await Db.SaveChangesAsync();
+		items = await Db.ShoppingItems.ToListAsync();
+	}
+}
