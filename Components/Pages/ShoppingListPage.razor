@@ -5,13 +5,12 @@
 @using ShoppingList.Model
 @inject AppDbContext Db
 
-
 <title>Shopping List</title>
-<h2>Shopping List</h2>
+<h2 class="pageTitle">Shopping List</h2>
 
-<div>
-	<input @bind="newName" placeholder="Product Name"/>
-	<input @bind="newQuantity" type="number" min="1"/>
+<div class="inputField">
+	<input  @bind="newName" placeholder="Product Name"/>
+	<input  @bind="newQuantity" type="number" min="1" />
 	<button @onclick="AddItem"> Add Item</button>
 </div>
 
